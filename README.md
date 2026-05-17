@@ -51,18 +51,15 @@ Here is a short example that lists all EC2 instances using Async:
 
 ```ocaml
 (* ec2_describe_instances.ml *)
-open Core
-open Async
+open! Core
+open! Async
 module Ec2 = Awso_ec2_async
 
 let ec2_describe_instances () =
   match%bind Ec2.describe_instances (Ec2.DescribeInstancesRequest.make ()) with
-  | Error aws ->
-    let errstr = aws |> Ec2.Ec2_error.to_json |> Yojson.Safe.to_string in
-    failwithf "AWS says your query had an error: %s\n" errstr ()
-  | Ok result ->
-    result.reservations
-    |> Option.value_exn ~here:[%here]
+  | Error e -> failwithf !"Query error: %{Yojson.Safe}" (Ec2.Ec2_error.to_json e) ()
+  | Ok { reservations; _ } ->
+    Option.value_exn ~here:[%here] reservations
     |> List.iter ~f:(fun reservation ->
       reservation.Ec2.Reservation.instances
       |> Option.value ~default:[]
@@ -75,7 +72,7 @@ let ec2_describe_instances () =
 let () =
   let cmd =
     Command.async
-      ~summary:"list EC2 instances in default region"
+      ~summary:"Test script: list EC2 instances in default region"
       (let%map_open.Command () = return () in
        fun () -> ec2_describe_instances ())
   in
