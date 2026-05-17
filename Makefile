@@ -1,20 +1,12 @@
 SHELL=/bin/bash
-.PHONY: default install-deps start-ocaml doc format runtest generate-code clean
+.PHONY: default install-deps start-ocaml doc format runtest generate-code clean publish-to-opam publish-to-opam-dry-run publish-doc
 
-default: start-ocaml
+default: build
 
 install-deps:
 	test -d _opam || opam switch create . 5.3.0 --no-install --yes
 	opam install . --deps-only --yes
-	opam install ocamlformat ocaml-lsp-server utop --yes
-
-start-ocaml:
-	dune build @all -w
-
-# start-ocaml builds all packages. That can be slow. The following command builds a
-# single package. For example, try `make aws-s3`.
-aws-%:
-	dune build @aws/$*/all -w
+	opam install ocamlformat ocaml-lsp-server utop dune-release --yes
 
 botodata-%:
 	wget https://github.com/boto/botocore/archive/$*.tar.gz
@@ -39,8 +31,38 @@ runtest:
 	dune build @runtest
 
 generate-code:
+	# generate some pre-flight modules in lib/runtime/awso
 	dune exec -- bin/awso_bootstrap.exe build-service-module --botocore-data vendor/botocore/botocore/data --runtime-dir lib/runtime/awso
+	# generate all services to aws/
 	dune exec -- bin/awso_codegen_main.exe generate-all --botocore-data vendor/botocore/botocore/data -o aws --runtime-dir lib/runtime/awso --cli-dir awso-cli
 
 clean:
 	dune clean
+
+publish-to-opam:
+	dune-release tag
+	dune-release distrib
+	dune-release publish distrib
+	dune-release opam pkg
+	dune-release opam submit
+
+publish-to-opam-dry-run:
+	@echo "=== building distribution tarball (real, but harmless) ==="
+	dune-release distrib
+	@echo
+	@echo "=== contents of generated tarball ==="
+	@ls -lh _build/*.tbz
+	@echo "  (full listing: tar tjf _build/*.tbz)"
+	@tar tjf _build/*.tbz | head -40
+	@echo
+	@echo "=== publish distrib (dry-run) ==="
+	dune-release publish distrib --dry-run
+	@echo
+	@echo "=== opam pkg (dry-run) ==="
+	dune-release opam pkg --dry-run
+	@echo
+	@echo "=== opam submit (dry-run) ==="
+	dune-release opam submit --dry-run
+
+publish-doc: doc
+	dune-release publish doc
