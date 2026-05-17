@@ -69,12 +69,13 @@
   ppx_expect))
 
 (package
- (name awso-unix)
- (synopsis "AWS API base library Unix")
+ (name awso-sync)
+ (synopsis "Synchronous (blocking) AWS client")
  (depends
   (ocaml
    (>= 4.14))
   awso
+  ocurl
   ppx_expect))
 
 (package

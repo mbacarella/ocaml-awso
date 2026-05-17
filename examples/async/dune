@@ -1,0 +1,102 @@
+;; One stanza per executable so each binary links only the service libs it
+;; actually uses. The awso-async.<service> libraries are individually large.
+;; Each stanza needs (modules ...) to restrict it to its own .ml file —
+;; without it dune compiles every .ml against every executable.
+
+(executable
+ (name ami_import)
+ (modules ami_import)
+ (libraries awso-async.ec2 awso-async.ebs core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name cognito_identity)
+ (modules cognito_identity)
+ (libraries awso-async.cognito-identity core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name cognito_idp)
+ (modules cognito_idp)
+ (libraries awso-async.cognito-idp core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name ebs)
+ (modules ebs)
+ (libraries awso-async.ebs core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name ec2)
+ (modules ec2)
+ (libraries awso-async.ec2 core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name ec2_describe_instances)
+ (modules ec2_describe_instances)
+ (libraries awso-async.ec2 core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name iam)
+ (modules iam)
+ (libraries awso-async.iam core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name route53)
+ (modules route53)
+ (libraries awso-async.route53 core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name s3)
+ (modules s3)
+ (libraries awso-async.s3 core_unix.command_unix core_unix.filename_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name sqs)
+ (modules sqs)
+ (libraries awso-async.sqs core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name sts)
+ (modules sts)
+ (libraries awso-async.sts core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name test)
+ (modules test)
+ (libraries
+  awso-async.ec2
+  awso-async.ecr
+  awso-async.ecs
+  awso-async.s3
+  awso-async.sso
+  core_unix.command_unix
+  core_unix.filename_unix)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name uat)
+ (modules uat)
+ (libraries awso-async.ec2 core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))

@@ -225,6 +225,7 @@ module Generate_all = struct
         let base_dir = outdir ^/ service in
         let async_dir = outdir ^/ service ^/ "async" in
         let lwt_dir = outdir ^/ service ^/ "lwt" in
+        let sync_dir = outdir ^/ service ^/ "sync" in
         eprintf "generating %s ...\n%!" service;
         (* base service: dune, endpoints.ml, values.ml (+ submodules) *)
         write_dune_file ~argv:argv_strs ~outdir:base_dir ~data:(Dune.make ~service);
@@ -316,6 +317,34 @@ module Generate_all = struct
           write_generated
             ~argv:argv_strs
             (lwt_dir ^/ sprintf "awso_%s_lwt.ml" service_under)
+            "include Io\ninclude Values";
+        (* sync io: dune, io.ml, io.mli, values.ml, main module *)
+        write_dune_file
+          ~argv:argv_strs
+          ~outdir:sync_dir
+          ~data:(Dune.make_io `Sync ~service);
+        Io.eval_structure
+          ~base_module:(sprintf "Awso_%s" service_under)
+          ~io_subsystem:`Sync
+          endpoints
+        |> Util.structure_to_string
+        |> write_generated ~argv:argv_strs (sync_dir ^/ "io.ml");
+        Io.eval_signature
+          ~protocol:botoservice.metadata.protocol
+          ~base_module:(sprintf "Awso_%s" service_under)
+          ~io_subsystem:`Sync
+          endpoints
+        |> Util.signature_to_string
+        |> write_generated ~argv:argv_strs (sync_dir ^/ "io.mli");
+        write_generated
+          ~argv:argv_strs
+          (sync_dir ^/ "values.ml")
+          (sprintf "include Awso_%s.Values" service_under);
+        if not (Dune.has_addendum ~io_kind:`Sync ~service)
+        then
+          write_generated
+            ~argv:argv_strs
+            (sync_dir ^/ sprintf "awso_%s_sync.ml" service_under)
             "include Io\ninclude Values");
     (* aggregate awso-cli: one binary that dispatches to every service *)
     (match cli_dir_opt with

@@ -1,4 +1,0 @@
-(executable
- (name awso_iam)
- (libraries awso-async.iam core_unix.command_unix)
- (flags (:standard)))

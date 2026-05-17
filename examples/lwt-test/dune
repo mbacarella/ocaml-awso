@@ -1,8 +1,0 @@
-(executable
- (name awso_test_lwt)
- (libraries awso-lwt.s3 awso-lwt.ec2 awso-lwt.ecr awso-lwt.ecs awso-lwt.sso
-   core_unix.filename_unix core_unix.command_unix)
- (flags
-  (:standard -open Core -open Lwt))
- (preprocess
-  (pps ppx_jane)))

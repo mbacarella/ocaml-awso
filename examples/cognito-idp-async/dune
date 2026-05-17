@@ -1,4 +1,0 @@
-(executable
- (name main)
- (libraries awso-async.cognito-idp core_unix.command_unix)
- (flags (:standard)))

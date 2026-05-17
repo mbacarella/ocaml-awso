@@ -13,21 +13,26 @@ Sub-libraries are provided for Async and Lwt versions of all code.
 
 ## Features
 
-Nearly all of AWS's 300+ APIs are supported. Async and Lwt concurrency
-interfaces are provided. There is additionally a command-line tool `awso-cli` for
+Nearly all of AWS's 300+ APIs are supported. Three I/O flavors:
+
+- `awso-async` — Jane Street Async backend
+- `awso-lwt` — Lwt backend
+- `awso-sync` — synchronous (blocking) backend; uses libcurl under the hood
+
+There is additionally a command-line tool `awso-cli` for
 all APIs composed using Core.Command.
 
 ## Getting started
 
-The library is massive and not currently released to OPAM to avoid
-overwhelming the package repository.
-
-To use `awso` in your project, we recommend installing it with `opam`.
-
 ```shell
-opam install awso-async # if using async
-opam install awso-lwt   # if using lwt
+opam install awso-async   # Async
+opam install awso-lwt     # Lwt
+opam install awso-sync    # synchronous (blocking)
+opam install awso-cli     # umbrella CLI binary
 ```
+
+Note: the AWS surface is massive (~300 services) and this package can take
+a lengthy amount of time to build. About 5 minutes of building on a typical workstation.
 
 ### Examples
 
@@ -83,6 +88,41 @@ Populate `~/.aws/config` and `~/.aws/credentials` in the usual way, then:
 ```
 dune exec ./ec2_describe_instances.exe
 ```
+
+## Repository layout
+
+| Path | Purpose | Shipped to opam? |
+|---|---|---|
+| `lib/runtime/awso/` | Core runtime: auth, HTTP, config, regions | Yes (`awso`) |
+| `lib/runtime/async/` | Async backend | Yes (`awso-async`) |
+| `lib/runtime/lwt/` | Lwt backend | Yes (`awso-lwt`) |
+| `lib/runtime/sync/` | Synchronous (blocking) backend, libcurl-based | Yes (`awso-sync`) |
+| `lib/runtime/unix/` | Sync Unix backend | Yes (`awso-unix`) |
+| `lib/common/` | Jane Street Core/Base compatibility shim | Yes (`awso-common`) |
+| `aws/<service>/` | Auto-generated per-service bindings (~300 services) | Yes (under `awso`, `awso-async`, `awso-lwt`, `awso-sync`) |
+| `awso-cli/` | A bit like the Python aws cli | Yes (`awso-cli`) |
+| `lib/codegen/` | The code generator that produces `aws/<service>/` from botocore JSON | **No**: private library |
+| `vendor/botocore/` | Vendored botocore JSON used by the codegen | **No**: not in release tarballs |
+| `dogfood/` | Internal maintenance tools that use `awso` itself | **No**: not packaged |
+| `examples/` | Example programs | **No**: not installed |
+
+### Why is the `aws/` tree committed to git?
+
+`aws/<service>/` contains roughly 300 services worth of generated OCaml. We
+commit it on purpose so that `opam install awso-async` (or any sibling
+package) never has to run the codegen at install time. End users get a
+~25-dependency build instead of ~50+ — `ppxlib`, `sedlex`, `ocamlgraph`, and
+the rest of the codegen toolchain stay private to maintainers. The decision
+trades repo size for install-time simplicity and predictability.
+
+Regeneration is a maintainer concern:
+
+```
+make generate-code   # re-runs awso-codegen against vendor/botocore/
+```
+
+After regenerating, commit the resulting diff alongside whatever change
+prompted it.
 
 ## Documentation
 

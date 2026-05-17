@@ -1,0 +1,19 @@
+(executable
+ (name cloudfront_list_distributions)
+ (modules cloudfront_list_distributions)
+ (libraries awso-sync.cloudfront))
+
+(executable
+ (name route53_list_zones)
+ (modules route53_list_zones)
+ (libraries awso-sync.route53))
+
+(executable
+ (name route53domains_list)
+ (modules route53domains_list)
+ (libraries awso-sync awso-sync.route53domains))
+
+(executable
+ (name s3_get)
+ (modules s3_get)
+ (libraries awso-sync.s3))

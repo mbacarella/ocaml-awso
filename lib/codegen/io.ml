@@ -25,6 +25,7 @@ let eval_structure ~base_module ~io_subsystem operations =
     match io_subsystem with
     | `Async -> "Awso_async"
     | `Lwt -> "Awso_lwt"
+    | `Sync -> "Awso_sync"
   in
   let base_open = make_open base_module in
   let io_open = make_open io_module in
@@ -140,6 +141,7 @@ let eval_signature ~protocol ~base_module ~io_subsystem endpoints =
       match io_subsystem with
       | `Async -> [%type: ([%t ok_arg], [%t error_arg]) Result.t Async.Deferred.t]
       | `Lwt -> [%type: ([%t ok_arg], [%t error_arg]) Result.t Lwt.t]
+      | `Sync -> [%type: ([%t ok_arg], [%t error_arg]) Result.t]
     in
     Ast_helper.Sig.value
       (Ast_helper.Val.mk

@@ -1,4 +1,0 @@
-(executable
- (name awso_s3)
- (libraries awso-async.s3 core_unix.command_unix)
- (flags (:standard)))

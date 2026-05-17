@@ -1,9 +1,0 @@
-(library
- (name awso_unix)
- (public_name awso-unix)
- (libraries awso)
- (ocamlopt_flags (-linscan))
- (preprocess
-  (pps ppx_expect))
- (synopsis "OCaml unix library for AWS clients.")
- (inline_tests))

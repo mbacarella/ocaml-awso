@@ -1,0 +1,9 @@
+(library
+ (name awso_sync)
+ (public_name awso-sync)
+ (libraries awso curl)
+ (ocamlopt_flags (-linscan))
+ (preprocess
+  (pps ppx_expect))
+ (synopsis "Synchronous (blocking) AWS client.")
+ (inline_tests))
